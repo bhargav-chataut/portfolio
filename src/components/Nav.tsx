@@ -1,10 +1,23 @@
-import { Github, Linkedin, Menu, PenLine, X } from 'lucide-react'
-import { useState } from 'react'
+import { Github, Linkedin, Menu, Moon, PenLine, Sun, X } from 'lucide-react'
+import { useEffect, useState } from 'react'
 
 const links = ['work', 'writing', 'experience', 'about']
 
+type Theme = 'dark' | 'light'
+
 export function Nav() {
   const [open, setOpen] = useState(false)
+  const [theme, setTheme] = useState<Theme>(() => {
+    const saved = localStorage.getItem('portfolio-theme')
+    return saved === 'light' ? 'light' : 'dark'
+  })
+
+  useEffect(() => {
+    document.documentElement.dataset.theme = theme
+    localStorage.setItem('portfolio-theme', theme)
+  }, [theme])
+
+  const toggleTheme = () => setTheme(theme === 'dark' ? 'light' : 'dark')
 
   return (
     <header className="nav-wrap">
@@ -19,12 +32,20 @@ export function Nav() {
           <a href="https://github.com/bhargav-chataut" target="_blank" rel="noreferrer" aria-label="GitHub"><Github size={18}/></a>
           <a href="https://www.linkedin.com/in/bhargav-chataut/" target="_blank" rel="noreferrer" aria-label="LinkedIn"><Linkedin size={18}/></a>
           <a href="https://medium.com/@bhargavchataut101" target="_blank" rel="noreferrer" aria-label="Medium"><PenLine size={18}/></a>
+          <button className="theme-toggle" onClick={toggleTheme} aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`} title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}>
+            {theme === 'dark' ? <Sun size={17}/> : <Moon size={17}/>} 
+          </button>
           <a className="nav-cta" href="#contact">Talk to me</a>
         </div>
 
-        <button className="menu-btn" onClick={() => setOpen(!open)} aria-label="Toggle navigation">
-          {open ? <X size={22}/> : <Menu size={22}/>} 
-        </button>
+        <div className="mobile-actions">
+          <button className="theme-toggle" onClick={toggleTheme} aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}>
+            {theme === 'dark' ? <Sun size={18}/> : <Moon size={18}/>} 
+          </button>
+          <button className="menu-btn" onClick={() => setOpen(!open)} aria-label="Toggle navigation">
+            {open ? <X size={22}/> : <Menu size={22}/>} 
+          </button>
+        </div>
       </nav>
 
       {open && (
