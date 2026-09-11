@@ -6,6 +6,8 @@ export const projects = [
     href: 'https://github.com/bhargav-chataut/ev2030-RAG',
     live: 'https://ev2030-rag.streamlit.app/',
     accent: 'EU ENERGY / RAG',
+    image: 'https://raw.githubusercontent.com/bhargav-chataut/ev2030-RAG/main/images/demo1.jpg',
+    imageAlt: 'EU Energy Transition Analyzer interface',
   },
   {
     name: 'ClashCoach',
@@ -13,6 +15,8 @@ export const projects = [
     stack: ['Python', 'FastAPI', 'Machine Learning'],
     href: 'https://github.com/bhargav-chataut/ClashCoach',
     accent: 'GAME AI / ML',
+    image: 'https://raw.githubusercontent.com/bhargav-chataut/ClashCoach/main/screenshots/hero.jpg',
+    imageAlt: 'ClashCoach application hero screen',
   },
   {
     name: 'movie_summary_GPT',
@@ -20,6 +24,8 @@ export const projects = [
     stack: ['PyTorch', 'nanoGPT', 'FastAPI', 'React', 'Docker'],
     href: 'https://github.com/bhargav-chataut/movie_summary_GPT',
     accent: 'LLM / FROM SCRATCH',
+    image: 'https://raw.githubusercontent.com/bhargav-chataut/movie_summary_GPT/master/assets/demo.gif',
+    imageAlt: 'Movie Summary GPT application demo',
   },
   {
     name: 'BullyBarrier',
@@ -34,6 +40,8 @@ export const projects = [
     stack: ['Kotlin', 'Android', 'Open-Meteo'],
     href: 'https://github.com/bhargav-chataut/SkySnap',
     accent: 'ANDROID / API',
+    image: 'https://raw.githubusercontent.com/bhargav-chataut/SkySnap/main/app/assests/SkyNap.gif',
+    imageAlt: 'SkySnap Android application demo',
   },
   {
     name: 'Air-Canvas',
