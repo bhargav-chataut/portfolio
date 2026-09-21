@@ -4,6 +4,8 @@ on:
   push:
     branches: [main]
   workflow_dispatch:
+  schedule:
+    - cron: '17 8 * * *'
 
 permissions:
   contents: read
@@ -23,6 +25,10 @@ jobs:
         with:
           node-version: 24
       - run: npm install
+      - name: Sync GitHub pins and Medium posts
+        run: node scripts/sync-content.mjs
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
       - run: npm run build
       - uses: actions/configure-pages@v5
         with:
@@ -30,6 +36,7 @@ jobs:
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist
+
   deploy:
     environment:
       name: github-pages
