@@ -1,14 +1,124 @@
+import { useEffect, useState } from 'react'
 import { ArrowDown, ArrowUpRight, Github, Linkedin, Mail, PenLine } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { Nav } from './components/Nav'
-import { ProjectCard } from './components/ProjectCard'
+import { ProjectCard, type Project } from './components/ProjectCard'
 import { WritingCard } from './components/WritingCard'
 import { ExperienceItem } from './components/ExperienceItem'
 import { SectionHeading } from './components/SectionHeading'
 import { ContactForm } from './components/ContactForm'
 import { experience, projects, writing } from './data/content'
 
+type PinnedRepo = {
+  author: string
+  name: string
+  description?: string
+  language?: string
+  stars?: number
+  forks?: number
+}
+
+type MediumPost = {
+  title: string
+  link: string
+  pubDate?: string
+  categories?: string[]
+}
+
+type WritingItem = {
+  title: string
+  meta: string
+  href: string
+}
+
+const GITHUB_USER = 'bhargav-chataut'
+const MEDIUM_USER = 'bhargavchataut101'
+
+function formatMediumDate(value?: string) {
+  if (!value) return ''
+
+  const parsed = new Date(value.replace(' ', 'T') + 'Z')
+  if (Number.isNaN(parsed.getTime())) return ''
+
+  return new Intl.DateTimeFormat('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+  }).format(parsed)
+}
+
 function App() {
+  const [displayProjects, setDisplayProjects] = useState<Project[]>(projects)
+  const [displayWriting, setDisplayWriting] = useState<WritingItem[]>(writing)
+
+  useEffect(() => {
+    const controller = new AbortController()
+
+    const loadPinnedRepos = async () => {
+      try {
+        const response = await fetch(`https://pinned.berrysauce.dev/get/${GITHUB_USER}`, {
+          signal: controller.signal,
+        })
+
+        if (!response.ok) throw new Error('Could not load pinned repositories')
+
+        const repos = await response.json() as PinnedRepo[]
+        if (!Array.isArray(repos) || repos.length === 0) return
+
+        setDisplayProjects(
+          repos.slice(0, 6).map((repo) => ({
+            name: repo.name,
+            blurb: repo.description || 'Pinned project on GitHub.',
+            stack: [
+              ...(repo.language ? [repo.language] : []),
+              ...(typeof repo.stars === 'number' ? [`${repo.stars} stars`] : []),
+              ...(typeof repo.forks === 'number' ? [`${repo.forks} forks`] : []),
+            ],
+            href: `https://github.com/${repo.author || GITHUB_USER}/${repo.name}`,
+            accent: repo.language ? `${repo.language} / PINNED` : 'GITHUB / PINNED',
+          })),
+        )
+      } catch (error) {
+        if (error instanceof DOMException && error.name === 'AbortError') return
+      }
+    }
+
+    const loadMediumPosts = async () => {
+      try {
+        const feedUrl = `https://medium.com/feed/@${MEDIUM_USER}`
+        const response = await fetch(
+          `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(feedUrl)}`,
+          { signal: controller.signal },
+        )
+
+        if (!response.ok) throw new Error('Could not load Medium posts')
+
+        const payload = await response.json() as { status?: string; items?: MediumPost[] }
+        if (payload.status !== 'ok' || !Array.isArray(payload.items) || payload.items.length === 0) return
+
+        setDisplayWriting(
+          payload.items.slice(0, 3).map((post) => {
+            const date = formatMediumDate(post.pubDate)
+            const topics = post.categories?.slice(0, 2).join(' · ') || 'Medium'
+
+            return {
+              title: post.title,
+              meta: [date, topics].filter(Boolean).join(' · '),
+              href: post.link,
+            }
+          }),
+        )
+      } catch (error) {
+        if (error instanceof DOMException && error.name === 'AbortError') return
+      }
+    }
+
+    void loadPinnedRepos()
+    void loadMediumPosts()
+
+    return () => controller.abort()
+  }, [])
+
   return (
     <div id="top">
       <Nav />
@@ -38,15 +148,16 @@ function App() {
         </section>
 
         <section className="section shell" id="work">
-          <SectionHeading eyebrow="Selected work" title="Things I’ve built." />
-          <div className="projects-grid">{projects.map((p, i) => <ProjectCard key={p.name} project={p} index={i}/>)}</div>
+          <SectionHeading eyebrow="Pinned on GitHub" title="Things I’ve built." />
+          <div className="projects-grid">{displayProjects.map((p, i) => <ProjectCard key={p.name} project={p} index={i}/>)}</div>
+          <a className="inline-link" href={`https://github.com/${GITHUB_USER}`} target="_blank" rel="noreferrer">View GitHub profile <ArrowUpRight size={16}/></a>
         </section>
 
         <section className="section soft-section" id="writing">
           <div className="shell">
-            <SectionHeading eyebrow="Writing" title="Notes from what I’m learning." />
-            <div className="writing-list">{writing.map((w, i) => <WritingCard key={w.title} {...w} index={i}/>)}</div>
-            <a className="inline-link" href="https://medium.com/@bhargavchataut101" target="_blank" rel="noreferrer">All writing on Medium <ArrowUpRight size={16}/></a>
+            <SectionHeading eyebrow="Latest on Medium" title="Notes from what I’m learning." />
+            <div className="writing-list">{displayWriting.map((w, i) => <WritingCard key={w.href} {...w} index={i}/>)}</div>
+            <a className="inline-link" href={`https://medium.com/@${MEDIUM_USER}`} target="_blank" rel="noreferrer">All writing on Medium <ArrowUpRight size={16}/></a>
           </div>
         </section>
 
@@ -85,9 +196,9 @@ function App() {
       <footer className="footer shell">
         <span>© 2026 Bhargav Chataut</span>
         <div className="footer-socials">
-          <a href="https://github.com/bhargav-chataut" target="_blank" rel="noreferrer"><Github size={16}/> GitHub</a>
+          <a href={`https://github.com/${GITHUB_USER}`} target="_blank" rel="noreferrer"><Github size={16}/> GitHub</a>
           <a href="https://www.linkedin.com/in/bhargav-chataut/" target="_blank" rel="noreferrer"><Linkedin size={16}/> LinkedIn</a>
-          <a href="https://medium.com/@bhargavchataut101" target="_blank" rel="noreferrer"><PenLine size={16}/> Medium</a>
+          <a href={`https://medium.com/@${MEDIUM_USER}`} target="_blank" rel="noreferrer"><PenLine size={16}/> Medium</a>
         </div>
       </footer>
     </div>
