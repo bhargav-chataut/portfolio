@@ -25,7 +25,7 @@ const previewOverrides = {
 }
 
 function cleanText(value = '') {
-  return value.replace(/—/g, '-').trim()
+  return value.replace(/[—–]/g, '-').trim()
 }
 
 function decodeXml(value = '') {
@@ -52,6 +52,91 @@ function extractTags(block, tag) {
     .filter(Boolean)
 }
 
+function canonicalLink(value = '') {
+  try {
+    const url = new URL(value)
+    url.search = ''
+    url.hash = ''
+    return url.toString().replace(/\/$/, '').toLowerCase()
+  } catch {
+    return value.trim().replace(/\/$/, '').toLowerCase()
+  }
+}
+
+function normalizeMediaUrl(src, repo, branch) {
+  if (!src) return ''
+  const cleaned = src.replace(/^<|>$/g, '').trim()
+  if (/^https?:\/\//i.test(cleaned)) return cleaned
+  if (cleaned.startsWith('data:')) return ''
+  return `https://raw.githubusercontent.com/${GITHUB_USER}/${repo}/${branch}/${cleaned.replace(/^\.\//, '').replace(/^\//, '')}`
+}
+
+function findYouTube(readme = '') {
+  const match = readme.match(/https?:\/\/(?:www\.)?(?:youtube\.com\/watch\?[^\s)\]]*v=|youtu\.be\/)([A-Za-z0-9_-]{6,})/i)
+  if (!match) return null
+
+  const id = match[1]
+  return {
+    demo: `https://www.youtube.com/watch?v=${id}`,
+    thumbnail: `https://img.youtube.com/vi/${id}/maxresdefault.jpg`,
+  }
+}
+
+function findReadmeImage(readme = '', repo, branch) {
+  const markdown = [...readme.matchAll(/!\[([^\]]*)\]\(([^)\s]+)(?:\s+["'][^)]*["'])?\)/g)]
+    .map((match) => ({ alt: match[1] || '', src: match[2] || '' }))
+
+  const html = [...readme.matchAll(/<img[^>]+src=["']([^"']+)["'][^>]*>/gi)]
+    .map((match) => ({ alt: '', src: match[1] || '' }))
+
+  const candidates = [...markdown, ...html]
+    .map((item, index) => {
+      const src = normalizeMediaUrl(item.src, repo, branch)
+      const haystack = `${item.alt} ${item.src}`.toLowerCase()
+      if (!src || /badge|shield|logo-only|icon/.test(haystack) || /\.svg(?:$|\?)/i.test(src)) return null
+
+      let score = 0
+      if (/demo|screenshot|preview|interface|hero|menu|app|screen/.test(haystack)) score += 20
+      if (/\.gif(?:$|\?)/i.test(src)) score += 8
+      if (/\.(?:png|jpe?g|webp)(?:$|\?)/i.test(src)) score += 4
+      score -= index * 0.05
+
+      return { src, alt: cleanText(item.alt), score }
+    })
+    .filter(Boolean)
+    .sort((a, b) => b.score - a.score)
+
+  return candidates[0] || null
+}
+
+async function fetchReadme(repo, branch, token) {
+  try {
+    const response = await fetch(`https://api.github.com/repos/${GITHUB_USER}/${repo}/readme`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: 'application/vnd.github+json',
+        'User-Agent': 'bhargav-portfolio-sync',
+      },
+    })
+
+    if (!response.ok) return null
+    const payload = await response.json()
+    if (!payload.content) return null
+
+    const readme = Buffer.from(payload.content.replace(/\n/g, ''), 'base64').toString('utf8')
+    const image = findReadmeImage(readme, repo, branch)
+    const youtube = findYouTube(readme)
+
+    return {
+      image: image?.src || youtube?.thumbnail,
+      imageAlt: image?.alt || (youtube ? `${cleanText(repo)} demo` : undefined),
+      demo: youtube?.demo,
+    }
+  } catch {
+    return null
+  }
+}
+
 async function getPinnedProjects() {
   const token = process.env.GITHUB_TOKEN
   if (!token) throw new Error('GITHUB_TOKEN is missing')
@@ -70,6 +155,7 @@ async function getPinnedProjects() {
               stargazerCount
               forkCount
               primaryLanguage { name }
+              defaultBranchRef { name }
             }
           }
         }
@@ -98,10 +184,14 @@ async function getPinnedProjects() {
 
   const nodes = payload.data?.user?.pinnedItems?.nodes || []
 
-  return nodes.map((repo) => {
+  return Promise.all(nodes.map(async (repo) => {
     const override = previewOverrides[repo.name] || {}
+    const branch = repo.defaultBranchRef?.name || 'main'
+    const readmeMedia = await fetchReadme(repo.name, branch, token)
+
     const live = override.live || repo.homepageUrl || undefined
-    const image = override.image || repo.openGraphImageUrl || undefined
+    const demo = readmeMedia?.demo || undefined
+    const image = override.image || readmeMedia?.image || repo.openGraphImageUrl || undefined
 
     return {
       name: cleanText(repo.name),
@@ -113,13 +203,14 @@ async function getPinnedProjects() {
       ],
       href: repo.url,
       ...(live ? { live } : {}),
+      ...(demo ? { demo } : {}),
       accent: repo.primaryLanguage?.name
         ? `${cleanText(repo.primaryLanguage.name).toUpperCase()} / PINNED`
         : 'GITHUB / PINNED',
       ...(image ? { image } : {}),
-      ...(image ? { imageAlt: override.imageAlt || `${cleanText(repo.name)} project preview` } : {}),
+      ...(image ? { imageAlt: override.imageAlt || readmeMedia?.imageAlt || `${cleanText(repo.name)} project preview` } : {}),
     }
-  })
+  }))
 }
 
 async function getMediumWriting() {
@@ -135,8 +226,7 @@ async function getMediumWriting() {
   }
 
   const xml = await response.text()
-  const items = [...xml.matchAll(/<item>([\s\S]*?)<\/item>/gi)]
-    .slice(0, 3)
+  const rawItems = [...xml.matchAll(/<item>([\s\S]*?)<\/item>/gi)]
     .map((match) => {
       const block = match[1]
       const categories = extractTags(block, 'category').slice(0, 2)
@@ -158,7 +248,24 @@ async function getMediumWriting() {
     })
     .filter((item) => item.title && item.href)
 
-  return items
+  const unique = []
+  const seenLinks = new Set()
+  const seenTitles = new Set()
+
+  for (const item of rawItems) {
+    const linkKey = canonicalLink(item.href)
+    const titleKey = cleanText(item.title).toLowerCase().replace(/\s+/g, ' ')
+
+    if (seenLinks.has(linkKey) || seenTitles.has(titleKey)) continue
+
+    seenLinks.add(linkKey)
+    seenTitles.add(titleKey)
+    unique.push(item)
+
+    if (unique.length === 3) break
+  }
+
+  return unique
 }
 
 let liveProjects = []
@@ -173,7 +280,7 @@ try {
 
 try {
   liveWriting = await getMediumWriting()
-  console.log(`Synced ${liveWriting.length} Medium posts.`)
+  console.log(`Synced ${liveWriting.length} unique Medium posts.`)
 } catch (error) {
   console.warn('Medium sync failed:', error.message)
 }
