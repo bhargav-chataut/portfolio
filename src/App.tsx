@@ -1,123 +1,20 @@
-import { useEffect, useState } from 'react'
 import { ArrowDown, ArrowUpRight, Github, Linkedin, Mail, PenLine } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { Nav } from './components/Nav'
-import { ProjectCard, type Project } from './components/ProjectCard'
+import { ProjectCard } from './components/ProjectCard'
 import { WritingCard } from './components/WritingCard'
 import { ExperienceItem } from './components/ExperienceItem'
 import { SectionHeading } from './components/SectionHeading'
 import { ContactForm } from './components/ContactForm'
 import { experience, projects, writing } from './data/content'
-
-type PinnedRepo = {
-  author: string
-  name: string
-  description?: string
-  language?: string
-  stars?: number
-  forks?: number
-}
-
-type MediumPost = {
-  title: string
-  link: string
-  pubDate?: string
-  categories?: string[]
-}
-
-type WritingItem = {
-  title: string
-  meta: string
-  href: string
-}
+import { liveProjects, liveWriting } from './data/liveContent'
 
 const GITHUB_USER = 'bhargav-chataut'
 const MEDIUM_USER = 'bhargavchataut101'
 
-function formatMediumDate(value?: string) {
-  if (!value) return ''
-
-  const parsed = new Date(value.replace(' ', 'T') + 'Z')
-  if (Number.isNaN(parsed.getTime())) return ''
-
-  return new Intl.DateTimeFormat('en-US', {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
-  }).format(parsed)
-}
-
 function App() {
-  const [displayProjects, setDisplayProjects] = useState<Project[]>(projects)
-  const [displayWriting, setDisplayWriting] = useState<WritingItem[]>(writing)
-
-  useEffect(() => {
-    const controller = new AbortController()
-
-    const loadPinnedRepos = async () => {
-      try {
-        const response = await fetch(`https://pinned.berrysauce.dev/get/${GITHUB_USER}`, {
-          signal: controller.signal,
-        })
-
-        if (!response.ok) throw new Error('Could not load pinned repositories')
-
-        const repos = await response.json() as PinnedRepo[]
-        if (!Array.isArray(repos) || repos.length === 0) return
-
-        setDisplayProjects(
-          repos.slice(0, 6).map((repo) => ({
-            name: repo.name,
-            blurb: repo.description || 'Pinned project on GitHub.',
-            stack: [
-              ...(repo.language ? [repo.language] : []),
-              ...(typeof repo.stars === 'number' ? [`${repo.stars} stars`] : []),
-              ...(typeof repo.forks === 'number' ? [`${repo.forks} forks`] : []),
-            ],
-            href: `https://github.com/${repo.author || GITHUB_USER}/${repo.name}`,
-            accent: repo.language ? `${repo.language} / PINNED` : 'GITHUB / PINNED',
-          })),
-        )
-      } catch (error) {
-        if (error instanceof DOMException && error.name === 'AbortError') return
-      }
-    }
-
-    const loadMediumPosts = async () => {
-      try {
-        const feedUrl = `https://medium.com/feed/@${MEDIUM_USER}`
-        const response = await fetch(
-          `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(feedUrl)}`,
-          { signal: controller.signal },
-        )
-
-        if (!response.ok) throw new Error('Could not load Medium posts')
-
-        const payload = await response.json() as { status?: string; items?: MediumPost[] }
-        if (payload.status !== 'ok' || !Array.isArray(payload.items) || payload.items.length === 0) return
-
-        setDisplayWriting(
-          payload.items.slice(0, 3).map((post) => {
-            const date = formatMediumDate(post.pubDate)
-            const topics = post.categories?.slice(0, 2).join(' · ') || 'Medium'
-
-            return {
-              title: post.title,
-              meta: [date, topics].filter(Boolean).join(' · '),
-              href: post.link,
-            }
-          }),
-        )
-      } catch (error) {
-        if (error instanceof DOMException && error.name === 'AbortError') return
-      }
-    }
-
-    void loadPinnedRepos()
-    void loadMediumPosts()
-
-    return () => controller.abort()
-  }, [])
+  const displayProjects = liveProjects.length ? liveProjects : projects
+  const displayWriting = liveWriting.length ? liveWriting : writing
 
   return (
     <div id="top">
