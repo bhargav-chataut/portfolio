@@ -8,6 +8,11 @@ const previewOverrides = {
   tacit: {
     image: 'https://raw.githubusercontent.com/bhargav-chataut/tacit/main/assets/menu1.jpg',
     imageAlt: 'Tacit communication interface',
+    demo: 'https://www.youtube.com/watch?v=S2FhpCqxrm8',
+  },
+  BullyBarrier: {
+    image: 'https://raw.githubusercontent.com/bhargav-chataut/BullyBarrier/main/assets/confusion_matrix.svg',
+    imageAlt: 'BullyBarrier logistic regression evaluation',
   },
   'ev2030-RAG': {
     image: 'https://raw.githubusercontent.com/bhargav-chataut/ev2030-RAG/main/images/demo1.jpg',
@@ -194,7 +199,7 @@ async function getPinnedProjects() {
     const readmeMedia = await fetchReadme(repo.name, branch, token)
 
     const live = override.live || repo.homepageUrl || undefined
-    const demo = readmeMedia?.demo || undefined
+    const demo = override.demo || readmeMedia?.demo || undefined
     const image = override.image || readmeMedia?.image || repo.openGraphImageUrl || undefined
 
     return {
