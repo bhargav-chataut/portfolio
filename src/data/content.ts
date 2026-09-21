@@ -59,12 +59,12 @@ export const writing = [
     href: 'https://medium.com/@bhargavchataut101',
   },
   {
-    title: 'RAG_101: Part 2 — Deep Dive into Retrieval',
+    title: 'RAG_101: Part 2 - Deep Dive into Retrieval',
     meta: 'Dense search · BM25 · hybrid retrieval',
     href: 'https://medium.com/@bhargavchataut101',
   },
   {
-    title: 'RAG_101: Part 1 — Intricacies of Chunking',
+    title: 'RAG_101: Part 1 - Intricacies of Chunking',
     meta: 'Chunking · context · RAG foundations',
     href: 'https://medium.com/@bhargavchataut101',
   },
@@ -74,13 +74,13 @@ export const experience = [
   {
     org: 'CodePath × Anthropic',
     role: 'AI Fellow',
-    period: 'Jun 2026 — Aug 2026',
+    period: 'Jun 2026 - Aug 2026',
     text: 'Built AI applications with Claude and Claude Code, implemented vectorless RAG, and fine-tuned an LLM with QLoRA while applying responsible AI practices.',
   },
   {
     org: 'Optimal Answers LLC',
     role: 'Software Engineering Intern',
-    period: 'Feb 2026 — May 2026',
+    period: 'Feb 2026 - May 2026',
     text: 'Worked on decision-optimization models for procurement, product mix, and production scheduling; integrated workflows with APIs, databases, Azure, and vision-language components.',
   },
 ]
