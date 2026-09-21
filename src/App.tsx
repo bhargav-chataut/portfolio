@@ -23,7 +23,7 @@ function App() {
         <section className="hero shell">
           <motion.div className="hero-main" initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: .65 }}>
             <p className="eyebrow">Computer Science · AI / ML · Southern Miss</p>
-            <h1>Bhargav<br/>Chataut.</h1>
+            <h1>Bhargav<br/>Chataut</h1>
             <p className="hero-statement">I’m a computer science student building and studying intelligent systems, especially deep learning, NLP, retrieval, and the software around them.</p>
             <div className="hero-actions">
               <a className="primary-btn" href="#work">Explore my work <ArrowDown size={16}/></a>
@@ -33,7 +33,7 @@ function App() {
 
           <motion.aside className="now-card" initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: .65, delay: .12 }}>
             <span className="now-label"><i/> NOW</span>
-            <h2>Reimplementing<br/><em>World Models.</em></h2>
+            <h2>Reimplementing<br/><em>World Models</em></h2>
             <p>I’m currently reimplementing Ha & Schmidhuber’s 2018 <strong>World Models</strong> paper from scratch, working through the VAE, MDN-RNN, and controller to understand the ideas by building them.</p>
             <a href="https://arxiv.org/abs/1803.10122" target="_blank" rel="noreferrer">Read the paper <ArrowUpRight size={15}/></a>
           </motion.aside>
@@ -45,28 +45,28 @@ function App() {
         </section>
 
         <section className="section shell" id="work">
-          <SectionHeading eyebrow="Pinned on GitHub" title="Things I’ve built." />
+          <SectionHeading eyebrow="Pinned on GitHub" title="Things I’ve built" />
           <div className="projects-grid">{displayProjects.map((p, i) => <ProjectCard key={p.name} project={p} index={i}/>)}</div>
           <a className="inline-link" href={`https://github.com/${GITHUB_USER}`} target="_blank" rel="noreferrer">View GitHub profile <ArrowUpRight size={16}/></a>
         </section>
 
         <section className="section soft-section" id="writing">
           <div className="shell">
-            <SectionHeading eyebrow="Latest on Medium" title="My writing." />
+            <SectionHeading eyebrow="Latest on Medium" title="My writing" />
             <div className="writing-list">{displayWriting.map((w, i) => <WritingCard key={w.href} {...w} index={i}/>)}</div>
             <a className="inline-link" href={`https://medium.com/@${MEDIUM_USER}`} target="_blank" rel="noreferrer">All writing on Medium <ArrowUpRight size={16}/></a>
           </div>
         </section>
 
         <section className="section shell" id="experience">
-          <SectionHeading eyebrow="Experience" title="Learning by doing." />
+          <SectionHeading eyebrow="Experience" title="Learning by doing" />
           <div className="experience-list">{experience.map((item) => <ExperienceItem key={item.org} {...item}/>)}</div>
         </section>
 
         <section className="section soft-section" id="about">
           <div className="shell about-grid">
             <div>
-              <SectionHeading eyebrow="About" title="A little more human." />
+              <SectionHeading eyebrow="About" title="A little more human" />
               <p className="about-copy">I’m a Computer Science student at the University of Southern Mississippi. I’m most interested in understanding how intelligent systems actually work, then turning that understanding into useful software.</p>
               <p className="about-copy">I learn best by building from first principles. Outside class, I write about AI/ML, help run campus communities, play badminton, and keep finding projects that are slightly beyond what I already know.</p>
             </div>
