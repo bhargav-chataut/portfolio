@@ -5,6 +5,10 @@ const MEDIUM_USER = 'bhargavchataut101'
 const outputPath = new URL('../src/data/liveContent.ts', import.meta.url)
 
 const previewOverrides = {
+  tacit: {
+    image: 'https://raw.githubusercontent.com/bhargav-chataut/tacit/main/assets/menu1.jpg',
+    imageAlt: 'Tacit communication interface',
+  },
   'ev2030-RAG': {
     image: 'https://raw.githubusercontent.com/bhargav-chataut/ev2030-RAG/main/images/demo1.jpg',
     imageAlt: 'EU Energy Transition Analyzer interface',
