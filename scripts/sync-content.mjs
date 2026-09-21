@@ -4,16 +4,41 @@ const GITHUB_USER = 'bhargav-chataut'
 const MEDIUM_USER = 'bhargavchataut101'
 const outputPath = new URL('../src/data/liveContent.ts', import.meta.url)
 
+const previewOverrides = {
+  'ev2030-RAG': {
+    image: 'https://raw.githubusercontent.com/bhargav-chataut/ev2030-RAG/main/images/demo1.jpg',
+    imageAlt: 'EU Energy Transition Analyzer interface',
+    live: 'https://ev2030-rag.streamlit.app/',
+  },
+  ClashCoach: {
+    image: 'https://raw.githubusercontent.com/bhargav-chataut/ClashCoach/main/screenshots/hero.jpg',
+    imageAlt: 'ClashCoach application hero screen',
+  },
+  movie_summary_GPT: {
+    image: 'https://raw.githubusercontent.com/bhargav-chataut/movie_summary_GPT/master/assets/demo.gif',
+    imageAlt: 'Movie Summary GPT application demo',
+  },
+  SkySnap: {
+    image: 'https://raw.githubusercontent.com/bhargav-chataut/SkySnap/main/app/assests/SkyNap.gif',
+    imageAlt: 'SkySnap Android application demo',
+  },
+}
+
+function cleanText(value = '') {
+  return value.replace(/—/g, '-').trim()
+}
+
 function decodeXml(value = '') {
-  return value
-    .replace(/^<!\[CDATA\[/, '')
-    .replace(/\]\]>$/, '')
-    .replace(/&amp;/g, '&')
-    .replace(/&lt;/g, '<')
-    .replace(/&gt;/g, '>')
-    .replace(/&quot;/g, '"')
-    .replace(/&#39;/g, "'")
-    .trim()
+  return cleanText(
+    value
+      .replace(/^<!\[CDATA\[/, '')
+      .replace(/\]\]>$/, '')
+      .replace(/&amp;/g, '&')
+      .replace(/&lt;/g, '<')
+      .replace(/&gt;/g, '>')
+      .replace(/&quot;/g, '"')
+      .replace(/&#39;/g, "'"),
+  )
 }
 
 function extractTag(block, tag) {
@@ -38,10 +63,10 @@ async function getPinnedProjects() {
           nodes {
             ... on Repository {
               name
-              nameWithOwner
               description
               url
               homepageUrl
+              openGraphImageUrl
               stargazerCount
               forkCount
               primaryLanguage { name }
@@ -73,20 +98,28 @@ async function getPinnedProjects() {
 
   const nodes = payload.data?.user?.pinnedItems?.nodes || []
 
-  return nodes.map((repo) => ({
-    name: repo.name,
-    blurb: repo.description || 'Pinned project on GitHub.',
-    stack: [
-      ...(repo.primaryLanguage?.name ? [repo.primaryLanguage.name] : []),
-      ...(typeof repo.stargazerCount === 'number' ? [`${repo.stargazerCount} stars`] : []),
-      ...(typeof repo.forkCount === 'number' ? [`${repo.forkCount} forks`] : []),
-    ],
-    href: repo.url,
-    ...(repo.homepageUrl ? { live: repo.homepageUrl } : {}),
-    accent: repo.primaryLanguage?.name
-      ? `${repo.primaryLanguage.name.toUpperCase()} / PINNED`
-      : 'GITHUB / PINNED',
-  }))
+  return nodes.map((repo) => {
+    const override = previewOverrides[repo.name] || {}
+    const live = override.live || repo.homepageUrl || undefined
+    const image = override.image || repo.openGraphImageUrl || undefined
+
+    return {
+      name: cleanText(repo.name),
+      blurb: cleanText(repo.description || 'Pinned project on GitHub.'),
+      stack: [
+        ...(repo.primaryLanguage?.name ? [cleanText(repo.primaryLanguage.name)] : []),
+        ...(typeof repo.stargazerCount === 'number' ? [`${repo.stargazerCount} stars`] : []),
+        ...(typeof repo.forkCount === 'number' ? [`${repo.forkCount} forks`] : []),
+      ],
+      href: repo.url,
+      ...(live ? { live } : {}),
+      accent: repo.primaryLanguage?.name
+        ? `${cleanText(repo.primaryLanguage.name).toUpperCase()} / PINNED`
+        : 'GITHUB / PINNED',
+      ...(image ? { image } : {}),
+      ...(image ? { imageAlt: override.imageAlt || `${cleanText(repo.name)} project preview` } : {}),
+    }
+  })
 }
 
 async function getMediumWriting() {
