@@ -1,18 +1,21 @@
-import { ArrowUpRight, Github } from 'lucide-react'
+import { ArrowUpRight, Github, Play } from 'lucide-react'
 import { motion } from 'framer-motion'
 
 export type Project = {
   name: string
   blurb: string
-  stack: string[]
+  stack: readonly string[]
   href: string
   live?: string
+  demo?: string
   accent: string
   image?: string
   imageAlt?: string
 }
 
 export function ProjectCard({ project, index }: { project: Project; index: number }) {
+  const mediaHref = project.demo || project.live || project.href
+
   return (
     <motion.article
       className="project-card"
@@ -22,7 +25,7 @@ export function ProjectCard({ project, index }: { project: Project; index: numbe
       transition={{ duration: 0.45, delay: index * 0.05 }}
     >
       {project.image && (
-        <a className="project-media" href={project.live || project.href} target="_blank" rel="noreferrer" aria-label={`Open ${project.name}`}>
+        <a className="project-media" href={mediaHref} target="_blank" rel="noreferrer" aria-label={`Open ${project.name}`}>
           <img src={project.image} alt={project.imageAlt || `${project.name} preview`} loading="lazy" />
         </a>
       )}
@@ -36,6 +39,7 @@ export function ProjectCard({ project, index }: { project: Project; index: numbe
         <div className="project-links">
           <a href={project.href} target="_blank" rel="noreferrer"><Github size={17}/> Code</a>
           {project.live && <a href={project.live} target="_blank" rel="noreferrer">Live <ArrowUpRight size={16}/></a>}
+          {project.demo && <a href={project.demo} target="_blank" rel="noreferrer"><Play size={15}/> Demo</a>}
         </div>
       </div>
     </motion.article>
