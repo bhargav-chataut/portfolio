@@ -35,7 +35,10 @@ function App() {
             <span className="now-label"><i/> NOW</span>
             <h2>Reimplementing<br/><em>World Models</em></h2>
             <p>I’m currently reimplementing Ha & Schmidhuber’s 2018 <strong>World Models</strong> paper from scratch, working through the VAE, MDN-RNN, and controller to understand the ideas by building them.</p>
-            <a href="https://arxiv.org/abs/1803.10122" target="_blank" rel="noreferrer">Read the paper <ArrowUpRight size={15}/></a>
+            <div className="now-links">
+              <a href="https://github.com/bhargav-chataut/world_model_2018" target="_blank" rel="noreferrer">View the repo <Github size={15}/></a>
+              <a href="https://arxiv.org/abs/1803.10122" target="_blank" rel="noreferrer">Read the paper <ArrowUpRight size={15}/></a>
+            </div>
           </motion.aside>
         </section>
 
