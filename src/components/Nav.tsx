@@ -2,9 +2,9 @@ import { Github, Linkedin, Menu, Moon, PenLine, Sun, X } from 'lucide-react'
 import { useEffect, useState } from 'react'
 
 const links = [
-  { href: 'work', label: 'Projects' },
-  { href: 'writing', label: 'Blogs' },
+  { href: 'work', label: 'Project' },
   { href: 'experience', label: 'Experience' },
+  { href: 'writing', label: 'Blog' },
   { href: 'about', label: 'About' },
 ]
 
