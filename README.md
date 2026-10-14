@@ -19,3 +19,5 @@ npm run build
 
 This repository includes a GitHub Pages workflow at `.github/workflows/deploy.yml`.
 Enable **Settings > Pages > Source: GitHub Actions** once, then pushes to `main` will deploy automatically.
+
+<!-- deployment refresh 2026-10-14 -->
