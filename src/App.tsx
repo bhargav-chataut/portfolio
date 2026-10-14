@@ -85,7 +85,7 @@ function App() {
         <section className="contact shell" id="contact">
           <div className="contact-intro">
             <p className="eyebrow">Contact</p>
-            <h2>Let’s connect.</h2>
+            <h2>Let’s connect</h2>
             <p>I’m always interested in thoughtful conversations about AI/ML, research, software, and opportunities to build useful systems.</p>
             <a className="contact-email" href="mailto:bhargavchataut.bc@gmail.com"><Mail size={17}/> bhargavchataut.bc@gmail.com</a>
           </div>
