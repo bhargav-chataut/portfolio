@@ -48,22 +48,22 @@ function App() {
         </section>
 
         <section className="section shell" id="work">
-          <SectionHeading eyebrow="Pinned on GitHub" title="Selected projects" />
+          <SectionHeading eyebrow="Pinned on GitHub" title="Project" />
           <div className="projects-grid">{displayProjects.map((p, i) => <ProjectCard key={p.name} project={p} index={i}/>)}</div>
           <a className="inline-link" href={`https://github.com/${GITHUB_USER}`} target="_blank" rel="noreferrer">View GitHub profile <ArrowUpRight size={16}/></a>
-        </section>
-
-        <section className="section soft-section" id="writing">
-          <div className="shell">
-            <SectionHeading eyebrow="Latest on Medium" title="Blogs" />
-            <div className="writing-list">{displayWriting.map((w, i) => <WritingCard key={w.href} {...w} index={i}/>)}</div>
-            <a className="inline-link" href={`https://medium.com/@${MEDIUM_USER}`} target="_blank" rel="noreferrer">View all posts on Medium <ArrowUpRight size={16}/></a>
-          </div>
         </section>
 
         <section className="section shell" id="experience">
           <SectionHeading eyebrow="Experience" title="Experience" />
           <div className="experience-list">{experience.map((item) => <ExperienceItem key={item.org} {...item}/>)}</div>
+        </section>
+
+        <section className="section soft-section" id="writing">
+          <div className="shell">
+            <SectionHeading eyebrow="Latest on Medium" title="Blog" />
+            <div className="writing-list">{displayWriting.map((w, i) => <WritingCard key={w.href} {...w} index={i}/>)}</div>
+            <a className="inline-link" href={`https://medium.com/@${MEDIUM_USER}`} target="_blank" rel="noreferrer">View all posts on Medium <ArrowUpRight size={16}/></a>
+          </div>
         </section>
 
         <section className="section soft-section" id="about">
